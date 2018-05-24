@@ -1,0 +1,8 @@
+hash: 329be88a4550756ca45223e408aee0059da4437a99f3e0fd0c34365bb732ff9e
+updated: 2018-05-24T16:29:14.341006+08:00
+imports:
+- name: github.com/gorilla/websocket
+  version: 21ab95fa12b9bdd8fecf5fa3586aad941cc98785
+- name: github.com/nlopes/slack
+  version: 8ab4d0b364ef1e9af5d102531da20d5ec902b6c4
+testImports: []

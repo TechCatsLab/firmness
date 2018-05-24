@@ -1,2 +1,4 @@
 package: github.com/TechCatsLab/firmness
-import: []
+import:
+- package: github.com/nlopes/slack
+  version: ~0.2.0
