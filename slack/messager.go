@@ -11,13 +11,13 @@ import (
 	"github.com/TechCatslab/firmness"
 )
 
-// SlackClient implements the Client interface.
-type SlackClient struct {
+// Messager implements the Client interface.
+type Messager struct {
 	client *slack.Client
 	config *firmness.Config
 }
 
-// AddConfig -
-func (sc *SlackClient) AddConfig(config *SlackConfig) error {
-	return nil
+// NewMessager creates a new messager for channel messaging.
+func NewMessager(config *Config) (*Messager, error) {
+	return nil, nil
 }

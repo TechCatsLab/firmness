@@ -5,15 +5,6 @@
 
 package slack
 
-import (
-	"github.com/TechCatslab/firmness"
-)
-
-// SlackConfig -
-type SlackConfig struct {
-}
-
-// NewConfig -
-func NewConfig() firmness.Config {
-	return &SlackConfig{}
+// Config -
+type Config struct {
 }
