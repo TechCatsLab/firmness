@@ -6,18 +6,44 @@
 package slack
 
 import (
-	"github.com/nlopes/slack"
+	"fmt"
 
-	"github.com/TechCatslab/firmness"
+	"github.com/nlopes/slack"
 )
 
-// Messager implements the Client interface.
+// Messager contains required information
 type Messager struct {
-	client *slack.Client
-	config *firmness.Config
+	client  *slack.Client
+	channel string
+	Config  slack.PostMessageParameters
 }
 
 // NewMessager creates a new messager for channel messaging.
-func NewMessager(config *Config) (*Messager, error) {
-	return nil, nil
+func NewMessager(token string, channel string, config *slack.PostMessageParameters) (*Messager, error) {
+	if token == "" {
+		return nil, fmt.Errorf("token cann't be null")
+	}
+
+	if channel == "" {
+		return nil, fmt.Errorf("channel cann't be null")
+	}
+
+	var messager = &Messager{
+		client:  slack.New(token),
+		channel: channel,
+	}
+
+	if config == nil {
+		messager.Config = slack.NewPostMessageParameters()
+	} else {
+		messager.Config = *config
+	}
+
+	return messager, nil
+}
+
+// PostMessage send message to the specified channel.
+func (m *Messager) PostMessage(message string) error {
+	_, _, err := m.client.PostMessage(m.channel, message, m.Config)
+	return err
 }

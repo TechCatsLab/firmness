@@ -1,20 +1,50 @@
 /*
  * Revision History:
- *     Initial: 2018/05/24        Li Zebang
+ *     Initial: 2018/05/26        Li Zebang
  */
 
 package mail
 
 import (
-	"github.com/TechCatslab/firmness"
+	"fmt"
+	"net/smtp"
+
+	"github.com/TechCatsLab/firmness/checker"
 )
 
-// MailClient implements the Client interface.
-type MailClient struct {
-	config *firmness.Config
+// Client contains required sender information
+type Client struct {
+	config *Config
 }
 
-// AddConfig -
-func (mc *MailClient) AddConfig(config *MailConfig) error {
-	return nil
+// NewClient create a sender client.
+func NewClient(config *Config) (*Client, error) {
+	if config == nil {
+		return nil, fmt.Errorf("config cann't be nil")
+	}
+
+	if !checker.IsEmail(config.From.Email) {
+		return nil, fmt.Errorf("the account's email %s is invalid", config.From.Email)
+	}
+
+	if !checker.IsEmail(config.Credentials.Username) || config.Credentials.Password == "" {
+		return nil, fmt.Errorf("the account's email %s is invalid", config.From.Email)
+	}
+
+	return &Client{config}, nil
+}
+
+// PostMessage send the message to the specified account.
+func (c *Client) PostMessage(subject, message string, to Account) error {
+	var auth = smtp.PlainAuth("", c.config.Credentials.Username, c.config.Credentials.Password, c.config.Host)
+
+	str := fmt.Sprintf("From: %s\r\nTo: %s\r\nSubject: %s\r\n\r\n%s", c.config.From.Email, to.Email, subject, message)
+
+	return smtp.SendMail(
+		fmt.Sprintf("%s:%s", c.config.Host, c.config.Port),
+		auth,
+		c.config.From.Email,
+		[]string{to.Email},
+		[]byte(str),
+	)
 }
