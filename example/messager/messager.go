@@ -27,7 +27,7 @@ func main() {
 		fmt.Println(err)
 	}
 
-	err = messager.PostMessage("Test")
+	err = messager.PostMessage("Warning Message", "backend", "middleware")
 	if err != nil {
 		fmt.Println(err)
 	}

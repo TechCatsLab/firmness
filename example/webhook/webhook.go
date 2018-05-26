@@ -17,7 +17,7 @@ func main() {
 	// https://my.slack.com/services/new/incoming-webhook/
 	webhook := slack.NewWebhook("webhook-link")
 
-	err := webhook.PostMessage("Test")
+	err := webhook.PostMessage("Warning Message", "backend", "middleware")
 	if err != nil {
 		fmt.Println(err)
 	}

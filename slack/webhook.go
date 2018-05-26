@@ -33,7 +33,15 @@ func NewWebhook(url string) *Webhook {
 
 // PostMessage send message to the specified channel.
 // This channel is determined when you create a webhook.
-func (w *Webhook) PostMessage(text string) error {
+func (w *Webhook) PostMessage(message string, labels ...string) error {
+	var text string
+
+	if labels == nil {
+		text = fmt.Sprintf("Message: %s", message)
+	} else {
+		text = fmt.Sprintf("Labels: %v\nMessage: %s", labels, message)
+	}
+
 	reqBody, err := json.Marshal(basicData{text})
 	if err != nil {
 		return err

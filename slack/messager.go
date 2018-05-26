@@ -15,7 +15,7 @@ import (
 type Messager struct {
 	client  *slack.Client
 	channel string
-	Config  slack.PostMessageParameters
+	Config  *slack.PostMessageParameters
 }
 
 // NewMessager creates a new messager for channel messaging.
@@ -34,16 +34,25 @@ func NewMessager(token string, channel string, config *slack.PostMessageParamete
 	}
 
 	if config == nil {
-		messager.Config = slack.NewPostMessageParameters()
+		cfg := slack.NewPostMessageParameters()
+		messager.Config = &cfg
 	} else {
-		messager.Config = *config
+		messager.Config = config
 	}
 
 	return messager, nil
 }
 
 // PostMessage send message to the specified channel.
-func (m *Messager) PostMessage(message string) error {
-	_, _, err := m.client.PostMessage(m.channel, message, m.Config)
+func (m *Messager) PostMessage(message string, labels ...string) error {
+	var text string
+
+	if labels == nil {
+		text = fmt.Sprintf("Message: %s", message)
+	} else {
+		text = fmt.Sprintf("Labels: %v\nMessage: %s", labels, message)
+	}
+
+	_, _, err := m.client.PostMessage(m.channel, text, *m.Config)
 	return err
 }

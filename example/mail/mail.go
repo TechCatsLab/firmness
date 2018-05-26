@@ -13,7 +13,7 @@ import (
 
 func main() {
 
-	// Please make sure to enable smtp service before use
+	// Please make sure to enable smtp service before use.
 	config := &mail.Config{
 		From: mail.Account{
 			Email: "xxx@163.com",
@@ -31,7 +31,11 @@ func main() {
 		fmt.Println(err)
 	}
 
-	err = client.PostMessage("Test", "Test", mail.Account{Email: "xxx@gmail.com"})
+	err = client.PostMessage(
+		"subject",
+		"message",
+		[]string{"backend", "middleware"},
+		mail.Account{Email: "xxx@gmail.com"})
 	if err != nil {
 		fmt.Println(err)
 	}

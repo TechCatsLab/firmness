@@ -35,16 +35,16 @@ func NewClient(config *Config) (*Client, error) {
 }
 
 // PostMessage send the message to the specified account.
-func (c *Client) PostMessage(subject, message string, to Account) error {
+func (c *Client) PostMessage(subject, message string, labels []string, to Account) error {
 	var auth = smtp.PlainAuth("", c.config.Credentials.Username, c.config.Credentials.Password, c.config.Host)
 
-	str := fmt.Sprintf("From: %s\r\nTo: %s\r\nSubject: %s\r\n\r\n%s", c.config.From.Email, to.Email, subject, message)
+	msg := fmt.Sprintf("From: %s\r\nTo: %s\r\nSubject: %s\r\n\r\nLabels: %v\nMessage: %s", c.config.From.Email, to.Email, subject, labels, message)
 
 	return smtp.SendMail(
 		fmt.Sprintf("%s:%s", c.config.Host, c.config.Port),
 		auth,
 		c.config.From.Email,
 		[]string{to.Email},
-		[]byte(str),
+		[]byte(msg),
 	)
 }
