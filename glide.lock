@@ -1,8 +1,16 @@
-hash: 329be88a4550756ca45223e408aee0059da4437a99f3e0fd0c34365bb732ff9e
-updated: 2018-05-24T16:29:14.341006+08:00
+hash: a3b4d8cc0b89e2723b04c9a8a2012edc0ff04793859b4e416b56832e1ad69c27
+updated: 2018-06-20T19:49:33.020527+08:00
 imports:
+- name: github.com/google/go-github
+  version: e48060a28fac52d0f1cb758bc8b87c07bac4a87d
+  subpackages:
+  - github
+- name: github.com/google/go-querystring
+  version: 53e6ce116135b80d037921a7fdd5138cf32d7a8a
+  subpackages:
+  - query
 - name: github.com/gorilla/websocket
-  version: 21ab95fa12b9bdd8fecf5fa3586aad941cc98785
+  version: 5ed622c449da6d44c3c8329331ff47a9e5844f71
 - name: github.com/nlopes/slack
   version: 8ab4d0b364ef1e9af5d102531da20d5ec902b6c4
 testImports: []
