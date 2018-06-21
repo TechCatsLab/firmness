@@ -68,7 +68,7 @@ func (w *Webhook) PostMessage(message string, labels ...string) error {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("slack server error: %s", resp.Status)
+		return fmt.Errorf("[firmness, slack, webhook] slack server error: %s", resp.Status)
 	}
 
 	return nil

@@ -15,9 +15,8 @@ func main() {
 
 	// Please make sure to enable smtp service before use.
 	config := &mail.Config{
-		From: mail.Account{
-			Email: "xxx@163.com",
-		},
+		From: "xxx@163.com",
+		To:   "xxx@gmail.com, xxx@outlook.com",
 		Host: "smtp.163.com",
 		Port: "25",
 		Credentials: mail.Credentials{
@@ -31,11 +30,7 @@ func main() {
 		fmt.Println(err)
 	}
 
-	err = client.PostMessage(
-		"subject",
-		"message",
-		[]string{"backend", "middleware"},
-		mail.Account{Email: "xxx@gmail.com"})
+	err = client.PostMessage("subject", "message", []string{"backend", "middleware"})
 	if err != nil {
 		fmt.Println(err)
 	}

@@ -21,11 +21,11 @@ type Messager struct {
 // NewMessager creates a new messager for channel messaging.
 func NewMessager(token string, channel string, config *slack.PostMessageParameters) (*Messager, error) {
 	if token == "" {
-		return nil, fmt.Errorf("token cann't be null")
+		return nil, fmt.Errorf("[firmness, slack, messager] token cann't be null")
 	}
 
 	if channel == "" {
-		return nil, fmt.Errorf("channel cann't be null")
+		return nil, fmt.Errorf("[firmness, slack, messager] channel cann't be null")
 	}
 
 	var messager = &Messager{

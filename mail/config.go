@@ -7,15 +7,11 @@ package mail
 
 // Config a basic structure of configurations
 type Config struct {
-	From        Account     `json:"from"`
+	From        string      `json:"from"`
+	To          string      `json:"to"`
 	Host        string      `json:"host"`
 	Port        string      `json:"port"`
 	Credentials Credentials `json:"credentials"`
-}
-
-// Account creates a basic email structure
-type Account struct {
-	Email string `json:"email"`
 }
 
 // Credentials used for logging into the email account of sender

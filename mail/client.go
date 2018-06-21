@@ -7,6 +7,7 @@ package mail
 
 import (
 	"fmt"
+	"net/mail"
 	"net/smtp"
 
 	"github.com/TechCatsLab/firmness/checker"
@@ -23,28 +24,38 @@ func NewClient(config *Config) (*Client, error) {
 		return nil, fmt.Errorf("config cann't be nil")
 	}
 
-	if !checker.IsEmail(config.From.Email) {
-		return nil, fmt.Errorf("the account's email %s is invalid", config.From.Email)
+	if !checker.IsEmail(config.From) {
+		return nil, fmt.Errorf("the account's email %s is invalid", config.From)
 	}
 
 	if !checker.IsEmail(config.Credentials.Username) || config.Credentials.Password == "" {
-		return nil, fmt.Errorf("the account's email %s is invalid", config.From.Email)
+		return nil, fmt.Errorf("the account's email %s is invalid", config.From)
 	}
 
 	return &Client{config}, nil
 }
 
 // PostMessage send the message to the specified account.
-func (c *Client) PostMessage(subject, message string, labels []string, to Account) error {
+func (c *Client) PostMessage(subject, message string, labels []string) error {
 	var auth = smtp.PlainAuth("", c.config.Credentials.Username, c.config.Credentials.Password, c.config.Host)
 
-	msg := fmt.Sprintf("From: %s\r\nTo: %s\r\nSubject: %s\r\n\r\nLabels: %v\nMessage: %s", c.config.From.Email, to.Email, subject, labels, message)
+	addrlist, err := mail.ParseAddressList(c.config.To)
+	if err != nil {
+		return err
+	}
+
+	to := make([]string, 0)
+	for _, addr := range addrlist {
+		to = append(to, addr.Address)
+	}
+
+	msg := fmt.Sprintf("From: %s\r\nTo: %s\r\nSubject: %s\r\n\r\nLabels: %v\nMessage: %s", c.config.From, c.config.To, subject, labels, message)
 
 	return smtp.SendMail(
 		fmt.Sprintf("%s:%s", c.config.Host, c.config.Port),
 		auth,
-		c.config.From.Email,
-		[]string{to.Email},
+		c.config.From,
+		to,
 		[]byte(msg),
 	)
 }
