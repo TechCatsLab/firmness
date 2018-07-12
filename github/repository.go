@@ -9,7 +9,8 @@ import (
 	"context"
 	"sync"
 
-	"github.com/google/go-github/github"
+	"github.com/TechCatsLab/firmness/github/base"
+	"github.com/TechCatsLab/firmness/github/pool"
 )
 
 // RepositoryInformation -
@@ -24,185 +25,53 @@ type RepositoryInformation struct {
 }
 
 type language struct {
-	Language   string `json:"language"`
-	Proportion int    `json:"proportion"`
-}
-
-type repositoriesGetReturn struct {
-	repository *github.Repository
-	response   *github.Response
-	err        error
-}
-
-func (cp ChannelPool) repositoriesGet(ctx context.Context, tag, owner, repo string, wg *sync.WaitGroup, ret *repositoriesGetReturn) {
-	defer wg.Done()
-	client, err := cp.Get(tag)
-	if err != nil {
-		ret.err = err
-		return
-	}
-	defer cp.Put(client)
-
-	repository, response, err := client.Repositories.Get(ctx, owner, repo)
-	if err != nil {
-		ret.err = err
-		return
-	}
-
-	if response != nil {
-		err = client.HandleResponse(response)
-		if err != nil {
-			ret.err = err
-			return
-		}
-	}
-
-	ret.repository = repository
-	ret.response = response
-}
-
-type repositoriesGetReadmeReturn struct {
-	repositoryContent *github.RepositoryContent
-	response          *github.Response
-	err               error
-}
-
-func (cp ChannelPool) repositoriesGetReadme(ctx context.Context, tag, owner, repo string, opt *github.RepositoryContentGetOptions, wg *sync.WaitGroup, ret *repositoriesGetReadmeReturn) {
-	defer wg.Done()
-	client, err := cp.Get(tag)
-	if err != nil {
-		ret.err = err
-		return
-	}
-	defer cp.Put(client)
-
-	repositoryContent, response, err := client.Repositories.GetReadme(ctx, owner, repo, opt)
-	if err != nil {
-		ret.err = err
-		return
-	}
-
-	if response != nil {
-		err = client.HandleResponse(response)
-		if err != nil {
-			ret.err = err
-			return
-		}
-	}
-
-	ret.repositoryContent = repositoryContent
-	ret.response = response
-}
-
-type repositoriesListAllTopicsReturn struct {
-	topics   []string
-	response *github.Response
-	err      error
-}
-
-func (cp ChannelPool) repositoriesListAllTopics(ctx context.Context, tag, owner, repo string, wg *sync.WaitGroup, ret *repositoriesListAllTopicsReturn) {
-	defer wg.Done()
-	client, err := cp.Get(tag)
-	if err != nil {
-		ret.err = err
-		return
-	}
-	defer cp.Put(client)
-
-	topics, response, err := client.Repositories.ListAllTopics(ctx, owner, repo)
-	if err != nil {
-		ret.err = err
-		return
-	}
-
-	if response != nil {
-		err = client.HandleResponse(response)
-		if err != nil {
-			ret.err = err
-			return
-		}
-	}
-
-	ret.topics = topics
-	ret.response = response
-}
-
-type repositoriesListLanguagesReturn struct {
-	languages map[string]int
-	response  *github.Response
-	err       error
-}
-
-func (cp ChannelPool) repositoriesListLanguages(ctx context.Context, tag, owner, repo string, wg *sync.WaitGroup, ret *repositoriesListLanguagesReturn) {
-	defer wg.Done()
-	client, err := cp.Get(tag)
-	if err != nil {
-		ret.err = err
-		return
-	}
-	defer cp.Put(client)
-
-	languages, response, err := client.Repositories.ListLanguages(ctx, owner, repo)
-	if err != nil {
-		ret.err = err
-		return
-	}
-
-	if response != nil {
-		err = client.HandleResponse(response)
-		if err != nil {
-			ret.err = err
-			return
-		}
-	}
-
-	ret.languages = languages
-	ret.response = response
+	Language   string  `json:"language"`
+	Proportion float32 `json:"proportion"`
 }
 
 // GetRepositoryInformation -
-func (cp ChannelPool) GetRepositoryInformation(tag, owner, repo string) (*RepositoryInformation, error) {
+func GetRepositoryInformation(owner, repo, tag string, p pool.Pool) (*RepositoryInformation, error) {
 	ctx := context.Background()
 	wg := &sync.WaitGroup{}
 	wg.Add(4)
 
 	var (
-		getReturn           = &repositoriesGetReturn{}
-		getReadmeReturn     = &repositoriesGetReadmeReturn{}
-		listAllTopicsReturn = &repositoriesListAllTopicsReturn{}
-		listLanguagesReturn = &repositoriesListLanguagesReturn{}
+		getReturn           = &base.RepositoriesGetReturn{}
+		getReadmeReturn     = &base.RepositoriesGetReadmeReturn{}
+		listAllTopicsReturn = &base.RepositoriesListAllTopicsReturn{}
+		listLanguagesReturn = &base.RepositoriesListLanguagesReturn{}
 	)
-	go cp.repositoriesGet(ctx, tag, owner, repo, wg, getReturn)
-	go cp.repositoriesGetReadme(ctx, tag, owner, repo, nil, wg, getReadmeReturn)
-	go cp.repositoriesListAllTopics(ctx, tag, owner, repo, wg, listAllTopicsReturn)
-	go cp.repositoriesListLanguages(ctx, tag, owner, repo, wg, listLanguagesReturn)
+	go base.RepositoriesGet(ctx, owner, repo, tag, p, wg, getReturn)
+	go base.RepositoriesGetReadme(ctx, owner, repo, tag, nil, p, wg, getReadmeReturn)
+	go base.RepositoriesListAllTopics(ctx, owner, repo, tag, p, wg, listAllTopicsReturn)
+	go base.RepositoriesListLanguages(ctx, owner, repo, tag, p, wg, listLanguagesReturn)
 
 	wg.Wait()
 
-	if getReturn.err != nil {
-		return nil, getReturn.err
+	if getReturn.Err != nil {
+		return nil, getReturn.Err
 	}
-	if getReadmeReturn.err != nil {
-		return nil, getReadmeReturn.err
+	if getReadmeReturn.Err != nil {
+		return nil, getReadmeReturn.Err
 	}
-	if listAllTopicsReturn.err != nil {
-		return nil, listAllTopicsReturn.err
+	if listAllTopicsReturn.Err != nil {
+		return nil, listAllTopicsReturn.Err
 	}
-	if listLanguagesReturn.err != nil {
-		return nil, listLanguagesReturn.err
+	if listLanguagesReturn.Err != nil {
+		return nil, listLanguagesReturn.Err
 	}
 
 	var (
-		ls    = make([]language, len(listLanguagesReturn.languages))
-		sum   int
+		ls    = make([]language, len(listLanguagesReturn.Languages))
+		sum   float32
 		index int
 	)
-	for key, val := range listLanguagesReturn.languages {
+	for key, val := range listLanguagesReturn.Languages {
 		ls[index] = language{
 			Language:   key,
-			Proportion: val,
+			Proportion: float32(val),
 		}
-		sum += val
+		sum += ls[index].Proportion
 		index++
 	}
 	for index := range ls {
@@ -211,10 +80,11 @@ func (cp ChannelPool) GetRepositoryInformation(tag, owner, repo string) (*Reposi
 
 	return &RepositoryInformation{
 		Owner:       &owner,
-		Avatar:      getReturn.repository.Owner.AvatarURL,
+		Avatar:      getReturn.Repository.Owner.AvatarURL,
 		Repo:        &repo,
-		Description: getReturn.repository.Description,
-		Topics:      listAllTopicsReturn.topics,
-		Readme:      getReadmeReturn.repositoryContent.DownloadURL,
+		Description: getReturn.Repository.Description,
+		Topics:      listAllTopicsReturn.Topics,
+		Languages:   ls,
+		Readme:      getReadmeReturn.RepositoryContent.DownloadURL,
 	}, nil
 }
